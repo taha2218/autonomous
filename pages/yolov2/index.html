@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YOLO V2</title>
+
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="prism.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container header__container">
+        <div class="header__left">
+          <h1>YOLO V2</h1>
+          <p>
+            Object Detection is one of the key software components in the next
+            generation of autonomous cars. Classification and localization
+            approaches for object detection had critically low response time
+            unsuitable for real time object detection. YOLO (You Only Look Once)
+            algorithm is a new approach to object detection that is based on
+            regression rather than classification. A single neural network
+            predicts bounding boxes and class probabilities directly from full
+            images in one evaluation.
+          </p>
+        </div>
+        <div class="header__right">
+          <div class="header__right-image">
+            <img src="../../images/yolov2.svg" />
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="about">
+      <div class="container about__container">
+        <div class="about__left">
+          <div class="header__right-image">
+            <img src="../../images/about.svg" />
+          </div>
+        </div>
+        <div class="about__right">
+          <div class="about__objective">
+            <h1>ALGORITHM</h1>
+            <div class="objectives__list">
+              <ul>
+                <li>1. The image is divided into S x S grid.</li>
+                <li>
+                  2. For each cell in the grid, bounding boxes (B) are
+                  predicted.
+                </li>
+                <li>
+                  3. Target Vector Y is defined of size S x S x (B*5+C), where C
+                  denotes the count of classes that are to be detected
+                </li>
+                <li>
+                  4. ntersection Over Union : It is a metric used in evaluating
+                  the performance of the YOLO algorithm. <br />IOU = Area of
+                  overlap / Area of union
+                </li>
+                <li>
+                  5. Confidence score for each bounding box is predicted as
+                  Pr(Object)*IOU. The confidence score for cells with no object
+                  should be zero. A total of five predictions are made for every
+                  bounding box: x, y, w, h and confidence C <br />The centre of
+                  the box relative to grid square is (x,y) <br />
+                  w is the width, h is the height relative to the entire image
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo">
+      <h1>DEMONSTRATION</h1>
+      <div class="container demo__container">
+        <div class="demo__left">
+          <iframe
+            src="https://drive.google.com/file/d/1E-M6ZyLgca9SgYr84dEd6jS2NX-iqj1l/preview"
+            width="640"
+            height="480"
+            allow="autoplay"
+          ></iframe>
+        </div>
+        <div class="demo__right">
+          <iframe
+            src="https://drive.google.com/file/d/1np1jgUxzDBS7XTWm7ax5IqSja2ddleLc/preview"
+            width="640"
+            height="480"
+            allow="autoplay"
+          ></iframe>
+        </div>
+      </div>
+      <p>
+        The above demonstration shows two videos side by sides. The video on the
+        left is the original video taken from a camera feed where a large number
+        of cars cam be seen travelling. We have passed this video through the
+        yolo v2 algorithm that then detects those cars and predicts the bounding
+        boxes.
+      </p>
+    </section>
+
+    <section class="code">
+      <h1>
+          IMPLEMENTATION
+      </h1>
+      <div class="container code__container">
+        <pre class="line-numbers">
+                <code class="language-python">
+                    import cv2
+                    from darkflow.net.build import TFNet
+                    import numpy as np
+                    import time
+                    import tensorflow as tf
+
+                    config = tf.ConfigProto(log_device_placement=True)
+                    config.gpu_options.allow_growth = True
+                    with tf.Session(config=config) as sess:
+                        options = {
+                                'model': 'cfg/yolov2-1c.cfg',
+                                'load': 3600,
+                                'threshold': 0.1,
+                                'gpu': 1.0
+                                        }
+                        tfnet = TFNet(options)
+
+
+                    capture = cv2.VideoCapture(0)
+                    capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+                    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+                    while True:
+                        stime = time.time()
+                        ret, frame = capture.read()
+                        if ret:
+                            results = tfnet.return_predict(frame)
+                            for result in results:
+                                tl = (result['topleft']['x'], result['topleft']['y'])
+                                br = (result['bottomright']['x'], result['bottomright']['y'])
+                                label = result['label']
+                                confidence = result['confidence']
+                                text = '{}: {:.0f}%'.format(label, confidence * 100)
+                                frame = cv2.rectangle(frame, tl, br, (0, 0, 255), 5)
+                                frame = cv2.putText(frame, text, tl, cv2.FONT_ITALIC, 1, (255, 255, 255), 2)
+                            cv2.imshow('frame', frame)
+                            print('FPS {:.1f}'.format(1 / (time.time() - stime)))
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
+
+                    capture.release()
+                    cv2.destroyAllWindows()
+
+                </code>
+            </pre>
+      </div>
+    </section>
+
+    <script src="./prism.js"></script>
+  </body>
+</html>

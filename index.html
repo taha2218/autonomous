@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autonomous Vehicles</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unicons.iconscout.com/release/v4.0.0/css/line.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <nav>
+      <div class="container nav__container">
+        <a href="index.html"><h4>PROJECT AUTONOMOUS</h4></a>
+        <ul class="nav__menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="#abt">About</a></li>
+          <li><a href="#cat">Categories</a></li>
+          <li><a href="#cont">Team</a></li>
+        </ul>
+        <button id="open-menu-btn"><i class="uil uil-bars"></i></button>
+        <button id="open-menu-btn"><i class="uil uil-multiply"></i></button>
+      </div>
+    </nav>
+
+    <header>
+        <div class="container header__container">
+            <div class="header__left">
+                <h1>
+                    Automated Object and Lane Detection using Hough Transform and YOLO for Autonomous Cars
+                </h1>
+                <p>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita beatae maxime error doloremque repudiandae. Magni molestias mollitia facere fuga illum!
+                </p>
+                <a href="#abt" class="btn btn-primary">
+                    Get Started
+                </a>
+            </div>
+
+            <div class="header__right">
+                <div class="header__right-image">
+                    <img src="./images/car.svg" >
+                </div>
+            </div>
+        </div>    
+    </header>
+
+    <section id="cat" class="categories">
+        <div class="container categories__container">
+            <div class="categories__left">
+                <h1>
+                    Car Modules
+                </h1>
+                <p>
+                    An autonomous car is a vehicle that is capable of driving itself with minimum or no human involvement by sensing and understanding its environment. Self Driving Cars involve the use of sensors, actuators, complex algorithms, AI systems and powerful processors to execute software. Object Detection in autonomous vehicles is used to help understand and perceive the surroundings of the vehicle for its safe driving. These are few models that apply deep learning and mathemadical models for the functioning of autnomous cars.
+
+                </p>
+                <a href="#" class="btn">Learn More</a>
+            </div>
+            <div class="categories__right">
+                <article class="category" onclick="goToYoloV2()">
+                    <span class="category__icon"><i class="uil uil-scenery"></i></span>
+                    <h5>YOLO V2</h5>
+                    <p>YOLO V3 algorithm to detect objects, pedestrians and other cars</p>
+                </article>
+                <article class="category" onclick="goToYoloV3()">
+                    <span class="category__icon"><i class="uil uil-capture"></i></span>
+                    <h5>YOLO V3</h5>
+                    <p>YOLO V4 algorithm to detect smaller objects, pedestrians and signs faster</p>
+                </article>
+                <article class="category" onclick="goToHough()">
+                    <span class="category__icon"><i class="uil uil-exchange"></i></span>
+                    <h5>Hough Transform</h5>
+                    <p>Hough transformation algorithm to detect driving lanes accurately</p>
+                </article>
+                <article class="category" onclick="goToMask()">
+                    <span class="category__icon"><i class="uil uil-palette"></i></span>
+                    <h5>Color Masking</h5>
+                    <p>Using color masking to distinctly identify different objects or sceneries</p>
+                </article>
+                <article class="category" onclick="goToSteer()">
+                    <span class="category__icon"><i class="uil uil-streering"></i></span>
+                    <h5>Steering Angle</h5>
+                    <p>Steering angle prediction using behavioral cloning to drive accurately</p>
+                </article>
+                <article class="category" onclick="goToSent()">
+                    <span class="category__icon"><i class="uil uil-microphone"></i></span>
+                    <h5>Sentiment Analysis</h5>
+                    <p>Sentiment Analysis to understand the passengers emotion and respond accordingly</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="abt" class="about">
+        <div class="container about__container">
+            <div class="about__left">
+                <div class="header__right-image">
+                    <img src="./images/about.svg" >
+                </div>
+            </div>
+            <div class="about__right">
+                <div class="about__motivation">
+                    <h1>
+                        MOTIVATION
+                    </h1>
+                    <p>
+                        A range of potential benefits that could revolutionize driving for the better led to the idea of building autonomous vehicles. These are greater road safety, greater independence, more economical and more productivity.
+                    </p>
+                </div>
+                <div class="about__objective">
+                    <h1>
+                        OBJECTIVES
+                    </h1>
+                    <div class="objectives__list">
+                        <ul>
+                            <li>1. To see the environment and navigate to the destination without harm</li>
+                            <li>2. To detect & identify/classify obstacles around the vehicle and make real-time decisions based on that</li>
+                            <li>3. To predict accurate steering angles by taking input of the lane</li>
+                            <li>4. To accurately detect lanes</li>
+                            <li>5. Sentiment Analysis of the drivers audio in order to predict human behaviour and contact respective authorities if need be.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cont" class="contact">
+        <h1>
+            PROJECT MEMBERS
+        </h1>
+        <div class="container contact__container">
+            <div class="card">
+                <img src="./images/Taha.jpg">
+                <h2>Taha Shahid</h2>
+                <p>BE - B</p>
+                <p>Computer Engineering</p> 
+                <p>Pimpri Chinchwad College of Engineering</p>
+            </div>
+            <div class="card">
+                <img src="./images/Rakshit.jpg">
+                <h2>Rakshit Jha</h2>
+                <p>BE - B</p>
+                <p>Computer Engineering</p> 
+                <p>Pimpri Chinchwad College of Engineering</p>
+            </div>
+            <div class="card">
+                <img src="./images/shruti.jpeg">
+                <h2>Shruti Sonune</h2>
+                <p>BE - B</p>
+                <p>Computer Engineering</p> 
+                <p>Pimpri Chinchwad College of Engineering</p>
+            </div>
+            <div class="card">
+                <img src="./images/pratik.jpeg">
+                <h2>Pratik Kore</h2>
+                <p>BE - B</p>
+                <p>Computer Engineering</p> 
+                <p>Pimpri Chinchwad College of Engineering</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="guide">
+        <h4>
+            Guide
+        </h4>
+        <h3>
+            Prof. Santwana Gudadhe
+        </h3>
+        <h5>
+            Department of Computer Engineering
+        </h5>
+        <h5>
+            Pimpri Chinchwad College of Engineering
+        </h5>
+    </div>
+
+    <script src="./main.js">
+
+    </script>
+
+  </body>
+</html>

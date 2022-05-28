@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YOLO V2</title>
+
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="prism.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container header__container">
+        <div class="header__left">
+          <h1>Sentiment Analysis</h1>
+          <p>
+            Sentiment analysis for autonomous car aims to make the car more safe
+            by tracking the passenger's emotions throughout the duration of the
+            journey. Sentiment Analysis can accordingly act by detecting and
+            identifying the mental state in which the driver is.
+          </p>
+        </div>
+        <div class="header__right">
+          <div class="header__right-image">
+            <img src="../../images/senti.svg" />
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="about">
+      <div class="container about__container">
+        <div class="about__left">
+          <div class="header__right-image">
+            <img src="../../images/about.svg" />
+          </div>
+        </div>
+        <div class="about__right">
+          <div class="about__objective">
+            <h1>ALGORITHM</h1>
+            <div class="objectives__list">
+              <ul>
+                <li>1. There are two lists of words. One of them includes only the positive ones, the other includes negatives.</li>
+                <li>
+                  2. The algorithm goes through the text, finds the words that match the criteria.
+                </li>
+                <li>
+                  3. After that, the algorithm calculates which type of words is more prevalent in the text. If there are more positive words, then the text is deemed to have a positive polarity.
+                </li>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo">
+      <h1>DEMONSTRATION</h1>
+      <div class="container demo__container">
+        <div class="demo__left">
+          <iframe src="https://drive.google.com/file/d/1WSsQtrGC7PbJXCwoV6oGtvFjh6NqAY7r/preview" width="640" height="480" allow="autoplay"></iframe>
+        </div>
+        <div class="demo__right">
+          <img src="../../images/sent.png" alt="" srcset="">
+        </div>
+      </div>
+      <p>
+        The above demonstration shows a picture and video side by side. The video on the
+        left is the video where the model is trained and tested. The image on the right shows the testing phase where the model predicts the tone of the speaker.
+      </p>
+    </section>
+
+    <section class="code">
+      <h1>IMPLEMENTATION</h1>
+      <div class="container code__container">
+        <pre class="line-numbers">
+                <code class="language-python">
+                  import tweepy
+                  from textblob import TextBlob
+                  #from wordcloud import WordCloud
+                  #import pandas as pd
+                  #import numpy as np
+                  #import matplotlib.pyplot as plt
+                  #plt.style.use('fivethirtyeight')
+                  #loading data
+                  from google.colab import files
+                  uploaded = files.upload()
+                  #get data
+                  mykeys = open('../keys.txt','r').read().splitlines()
+                  # Twitter API Credentials
+                  api_key = mykeys[0].split()[-1]
+                  api_key_secret = mykeys[1].split()[-1]
+                  access_token = mykeys[2].split()[-1]
+                  access_token_secret = mykeys[3].split()[-1]
+                  # Connecting to the API
+                  auth_handler = tweepy.OAuthHandler(consumer_key = api_key, consumer_secret = api_key_secret)
+                  #set access to the access token
+                  auth_handler.set_access_token(access_token, access_token_secret)
+                  # creating the API
+                  api = tweepy.API(auth_handler)
+                  #search_term = 'stocks'
+                  search_term = input('\nEnter the word to search: ')
+                  tweet_amount = 200
+                  polarity = 0 #indicates if the text is positive or negative
+                  positive, negative, neutral = 0, 0, 0
+                  tweets = tweepy.Cursor(api.search, q = search_term, lang = 'en').items(tweet_amount)
+                  for tweet in tweets:
+                    final_text = tweet.text.replace('RT', '')
+                    if final_text.startswith(' @'):
+                      position = final_text.index(':')
+                      final_text = final_text[position+2:]
+                    if final_text.startswith('@'):
+                      position = final_text.index(' ')
+                      final_text = final_text[position+2:]
+                    #print(final_text)
+                    analysis = TextBlob(final_text)
+                    polarity += analysis.polarity
+                    tweet_polarity = analysis.polarity
+                    if tweet_polarity > 0:
+                      positive += 1
+                    elif tweet_polarity < 0: 
+                      negative += 1
+                    else:
+                      neutral += 1
+                      polarity += tweet_polarity
+                    print('overall polarity ',polarity)
+                    print('positive pol ', positive)
+                    print('negative pol ', negative)
+                    print('neutral pol ', neutral)
+                </code>
+            </pre>
+      </div>
+    </section>
+
+    <script src="./prism.js"></script>
+  </body>
+</html>

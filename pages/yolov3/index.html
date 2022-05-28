@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YOLO V2</title>
+
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="prism.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container header__container">
+        <div class="header__left">
+          <h1>YOLO V3</h1>
+          <p>
+            Object Detection is one of the key software components in the next
+            generation of autonomous cars. Classification and localization
+            approaches for object detection had critically low response time
+            unsuitable for real time object detection. YOLO (You Only Look Once)
+            algorithm is a new approach to object detection that is based on
+            regression rather than classification. A single neural network
+            predicts bounding boxes and class probabilities directly from full
+            images in one evaluation. YOLOv3 algorithm which is an improved
+            version of the YOLO algorithm can be used to detect the traffic
+            participants (vehicles, pedestrians, traffic signs and lights)
+            effectively in variety of different driving conditions (bright and
+            overcast sky, snow, fog, and night).
+          </p>
+        </div>
+        <div class="header__right">
+          <div class="header__right-image">
+            <img src="../../images/yolov3.svg" />
+          </div>
+        </div>
+      </div>
+    </header>
+    <section class="about">
+      <div class="container about__container">
+        <div class="about__left">
+          <div class="header__right-image">
+            <img src="../../images/about.svg" />
+          </div>
+        </div>
+        <div class="about__right">
+          <div class="about__objective">
+            <h1>ALGORITHM</h1>
+            <div class="objectives__list">
+              <ul>
+                <li>1. The image is divided into S x S grid.</li>
+                <li>
+                  2. For each cell in the grid, bounding boxes (B) are
+                  predicted.
+                </li>
+                <li>
+                  3. Target Vector Y is defined of size S x S x (B*5+C), where C
+                  denotes the count of classes that are to be detected
+                </li>
+                <li>
+                  4. ntersection Over Union : It is a metric used in evaluating
+                  the performance of the YOLO algorithm. <br />IOU = Area of
+                  overlap / Area of union
+                </li>
+                <li>
+                  5. Confidence score for each bounding box is predicted as
+                  Pr(Object)*IOU. The confidence score for cells with no object
+                  should be zero. A total of five predictions are made for every
+                  bounding box: x, y, w, h and confidence C <br />The centre of
+                  the box relative to grid square is (x,y) <br />
+                  w is the width, h is the height relative to the entire image
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo">
+      <h1>DEMONSTRATION</h1>
+      <div class="container demo__container">
+        <div class="demo__left">
+          <iframe
+            src="https://drive.google.com/file/d/1g1j5RHmi4U0Df5pnPaq3gWn66Ti0KFoU/preview"
+            width="640"
+            height="480"
+            allow="autoplay"
+          ></iframe>
+        </div>
+        <div class="demo__right">
+          <iframe
+            src="https://drive.google.com/file/d/1YQv7uDBHs8L8FIBvXOkR9YNJPH2uLfYy/preview"
+            width="640"
+            height="480"
+            allow="autoplay"
+          ></iframe>
+        </div>
+      </div>
+      <p>
+        The above demonstration shows two videos side by sides. The video on the
+        left is the original video taken from a camera feed where a large number
+        of cars cam be seen travelling. We have passed this video through the
+        yolo v2 algorithm that then detects those cars and predicts the bounding
+        boxes.
+      </p>
+    </section>
+
+    <section class="code">
+      <h1>IMPLEMENTATION</h1>
+      <div class="container code__container">
+        <pre class="line-numbers">
+                <code class="language-python">
+                  # Important imports
+                  from app import app
+                  from flask import request, render_template, url_for
+                  import cv2
+                  import numpy as np
+                  from PIL import Image
+                  import string
+                  import random
+                  import os
+
+                  # Adding path to config
+                  app.config['INITIAL_FILE_UPLOADS'] = 'app/static/uploads'
+
+                  car_cascade_src = 'app/static/cascade/cars.xml'
+                  bus_cascade_src = 'app/static/cascade/Bus_front.xml'
+
+                  # Route to home page
+                  @app.route("/", methods=["GET", "POST"])
+                  def index():
+
+                    # Execute if request is get
+                    if request.method == "GET":
+                      full_filename =  'images/white_bg.jpg'
+                      return render_template("index.html", full_filename = full_filename)
+
+                    # Execute if reuqest is post
+                    if request.method == "POST":
+
+                      image_upload = request.files['image_upload']
+                      imagename = image_upload.filename
+
+                      # generating unique name to save image
+                      letters = string.ascii_lowercase
+                      name = ''.join(random.choice(letters) for i in range(10)) + '.png'
+                      full_filename =  'uploads/' + name
+
+                      image = Image.open(image_upload)
+                      image = image.resize((450,250))
+                      image_arr = np.array(image)
+                      grey = cv2.cvtColor(image_arr,cv2.COLOR_BGR2GRAY)
+
+                        #Cascade
+                      car_cascade = cv2.CascadeClassifier(car_cascade_src)
+                      cars = car_cascade.detectMultiScale(grey, 1.1, 1)
+
+                      bcnt = 0
+                      bus_cascade = cv2.CascadeClassifier(bus_cascade_src)
+                      bus = bus_cascade.detectMultiScale(grey, 1.1, 1)
+                      for (x,y,w,h) in bus:
+                        cv2.rectangle(image_arr,(x,y),(x+w,y+h),(0,255,0),2)
+                        bcnt += 1
+
+                      ccnt = 0
+                      if bcnt == 0:
+                        for (x,y,w,h) in cars:
+                          cv2.rectangle(image_arr,(x,y),(x+w,y+h),(255,0,0),2)
+                          ccnt += 1
+
+                      img = Image.fromarray(image_arr, 'RGB')
+                      img.save(os.path.join(app.config['INITIAL_FILE_UPLOADS'], name))
+
+                      # Returning template, filename, extracted text
+                      result = str(ccnt) + ' cars and ' + str(bcnt) + ' buses found'
+                      return render_template('index.html', full_filename = full_filename, pred = result)
+
+
+                  @app.route('/yoloRealTime')
+                  def yoloRealTime():
+                    return render_template('yoloRealTime.html')
+
+                  @app.route('/lane')
+                  def lane():
+                    return render_template('lane.html')
+
+                  @app.route('/videolane')
+                  def videolane():
+                      return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+                  @app.route('/video')
+                  def video():
+                      return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+                  @app.route('/home')
+                  def home():
+                      return render_template('home.html')
+
+                  @app.route('/test1')
+                  def test1():
+                      return render_template('test1.html')
+
+                  @app.route('/contact')
+                  def contact():
+                      return render_template('contact.html')
+
+
+                  #code for yolo
+
+                  from flask import Response
+                  import time
+
+                  camera=cv2.VideoCapture(0)
+
+                  # Preparing variables for spatial dimensions of the frames
+                  h, w = None, None
+
+                  """
+                  End of:
+                  Reading stream video from camera
+                  """
+
+
+                  """
+                  Start of:
+                  Loading YOLO v3 network
+                  """
+
+                  # Loading COCO class labels from file
+                  # Opening file
+
+
+                  with open('app/yolo-coco-data/coco.names') as f:
+                      # Getting labels reading every line
+                      # and putting them into the list
+                      labels = [line.strip() for line in f]
+
+
+                  # # Check point
+                  # print('List with labels names:')
+                  # print(labels)
+
+                  # Loading trained YOLO v3 Objects Detector
+                  # with the help of 'dnn' library from OpenCV
+                  # Pay attention! If you're using Windows, yours paths might look like:
+                  # r'yolo-coco-data\yolov3.cfg'
+                  # r'yolo-coco-data\yolov3.weights'
+                  # or:
+                  # 'yolo-coco-data\\yolov3.cfg'
+                  # 'yolo-coco-data\\yolov3.weights'
+                  network = cv2.dnn.readNetFromDarknet('app/yolo-coco-data/yolov3.cfg',
+                                                      'app/yolo-coco-data/yolov3.weights')
+
+                  # Getting list with names of all layers from YOLO v3 network
+                  layers_names_all = network.getLayerNames()
+
+                  # # Check point
+                  # print()
+                  # print(layers_names_all)
+
+                  # Getting only output layers' names that we need from YOLO v3 algorithm
+                  # with function that returns indexes of layers with unconnected outputs
+                  layers_names_output = \
+                      [layers_names_all[i[0] - 1] for i in network.getUnconnectedOutLayers()]
+
+                  # # Check point
+                  # print()
+                  # print(layers_names_output)  # ['yolo_82', 'yolo_94', 'yolo_106']
+
+                  # Setting minimum probability to eliminate weak predictions
+                  probability_minimum = 0.5
+
+                  # Setting threshold for filtering weak bounding boxes
+                  # with non-maximum suppression
+                  threshold = 0.3
+
+                  # Generating colours for representing every detected object
+                  # with function randint(low, high=None, size=None, dtype='l')
+                  colours = np.random.randint(0, 255, size=(len(labels), 3), dtype='uint8')
+
+                  # # Check point
+                  # print()
+                  # print(type(colours))  # <class 'numpy.ndarray'>
+                  # print(colours.shape)  # (80, 3)
+                  # print(colours[0])  # [172  10 127]
+
+                  """
+                  End of:
+                  Loading YOLO v3 network
+                  """
+
+                  def generate_frames():
+                      while True:
+                              
+                          ## read the camera frame
+                          success,frame=camera.read()
+                          if not success:
+                              break
+                          else:
+                              
+                                          # Getting spatial dimensions of the frame
+                              # we do it only once from the very beginning
+                              # all other frames have the same dimension
+                              h, w = None, None
+                              if w is None or h is None:
+                                  # Slicing from tuple only first two elements
+                                  h, w = frame.shape[:2]
+
+                              """
+                              Start of:
+                              Getting blob from current frame
+                              """
+
+                              # Getting blob from current frame
+                              # The 'cv2.dnn.blobFromImage' function returns 4-dimensional blob from current
+                              # frame after mean subtraction, normalizing, and RB channels swapping
+                              # Resulted shape has number of frames, number of channels, width and height
+                              # E.G.:
+                              # blob = cv2.dnn.blobFromImage(image, scalefactor=1.0, size, mean, swapRB=True)
+                              blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416),
+                                                          swapRB=True, crop=False)
+
+                              """
+                              End of:
+                              Getting blob from current frame
+                              """
+
+                              """
+                              Start of:
+                              Implementing Forward pass
+                              """
+
+                              # Implementing forward pass with our blob and only through output layers
+                              # Calculating at the same time, needed time for forward pass
+                              network.setInput(blob)  # setting blob as input to the network
+                              start = time.time()
+                              output_from_network = network.forward(layers_names_output)
+                              end = time.time()
+
+                              # Showing spent time for single current frame
+                              print('Current frame took {:.5f} seconds'.format(end - start))
+
+                              """
+                              End of:
+                              Implementing Forward pass
+                              """
+
+                              """
+                              Start of:
+                              Getting bounding boxes
+                              """
+
+                              # Preparing lists for detected bounding boxes,
+                              # obtained confidences and class's number
+                              bounding_boxes = []
+                              confidences = []
+                              class_numbers = []
+
+                              # Going through all output layers after feed forward pass
+                              for result in output_from_network:
+                                  # Going through all detections from current output layer
+                                  for detected_objects in result:
+                                      # Getting 80 classes' probabilities for current detected object
+                                      scores = detected_objects[5:]
+                                      # Getting index of the class with the maximum value of probability
+                                      class_current = np.argmax(scores)
+                                      # Getting value of probability for defined class
+                                      confidence_current = scores[class_current]
+
+                                      # # Check point
+                                      # # Every 'detected_objects' numpy array has first 4 numbers with
+                                      # # bounding box coordinates and rest 80 with probabilities
+                                      # # for every class
+                                      # print(detected_objects.shape)  # (85,)
+
+                                      # Eliminating weak predictions with minimum probability
+                                      if confidence_current > probability_minimum:
+                                          # Scaling bounding box coordinates to the initial frame size
+                                          # YOLO data format keeps coordinates for center of bounding box
+                                          # and its current width and height
+                                          # That is why we can just multiply them elementwise
+                                          # to the width and height
+                                          # of the original frame and in this way get coordinates for center
+                                          # of bounding box, its width and height for original frame
+                                          box_current = detected_objects[0:4] * np.array([w, h, w, h])
+
+                                          # Now, from YOLO data format, we can get top left corner coordinates
+                                          # that are x_min and y_min
+                                          x_center, y_center, box_width, box_height = box_current
+                                          x_min = int(x_center - (box_width / 2))
+                                          y_min = int(y_center - (box_height / 2))
+
+                                          # Adding results into prepared lists
+                                          bounding_boxes.append([x_min, y_min,
+                                                              int(box_width), int(box_height)])
+                                          confidences.append(float(confidence_current))
+                                          class_numbers.append(class_current)
+
+                              """
+                              End of:
+                              Getting bounding boxes
+                              """
+
+                              """
+                              Start of:
+                              Non-maximum suppression
+                              """
+
+                              # Implementing non-maximum suppression of given bounding boxes
+                              # With this technique we exclude some of bounding boxes if their
+                              # corresponding confidences are low or there is another
+                              # bounding box for this region with higher confidence
+
+                              # It is needed to make sure that data type of the boxes is 'int'
+                              # and data type of the confidences is 'float'
+                              # https://github.com/opencv/opencv/issues/12789
+                              results = cv2.dnn.NMSBoxes(bounding_boxes, confidences,
+                                                      probability_minimum, threshold)
+
+                              """
+                              End of:
+                              Non-maximum suppression
+                              """
+
+                              """
+                              Start of:
+                              Drawing bounding boxes and labels
+                              """
+
+                              # Checking if there is at least one detected object
+                              # after non-maximum suppression
+                              if len(results) > 0:
+                                  # Going through indexes of results
+                                  for i in results.flatten():
+                                      # Getting current bounding box coordinates,
+                                      # its width and height
+                                      x_min, y_min = bounding_boxes[i][0], bounding_boxes[i][1]
+                                      box_width, box_height = bounding_boxes[i][2], bounding_boxes[i][3]
+
+                                      # Preparing colour for current bounding box
+                                      # and converting from numpy array to list
+                                      colour_box_current = colours[class_numbers[i]].tolist()
+
+                                      # # # Check point
+                                      # print(type(colour_box_current))  # <class 'list'>
+                                      # print(colour_box_current)  # [172 , 10, 127]
+
+                                      # Drawing bounding box on the original current frame
+                                      cv2.rectangle(frame, (x_min, y_min),
+                                                  (x_min + box_width, y_min + box_height),
+                                                  colour_box_current, 2)
+
+                                      # Preparing text with label and confidence for current bounding box
+                                      text_box_current = '{}: {:.4f}'.format(labels[int(class_numbers[i])],
+                                                                          confidences[i])
+
+                                      # Putting text with label and confidence on the original image
+                                      cv2.putText(frame, text_box_current, (x_min, y_min - 5),
+                                                  cv2.FONT_HERSHEY_SIMPLEX, 0.5, colour_box_current, 2)
+
+                              """
+                              End of:
+                              Drawing bounding boxes and labels
+                              """
+
+                              """
+                              Start of:
+                              Showing processed frames in OpenCV Window
+                              """
+
+                              # Showing results obtained from camera in Real Time
+
+                              # Showing current frame with detected objects
+                              # Giving name to the window with current frame
+                              # And specifying that window is resizable
+                              #cv2.namedWindow('YOLO v3 Real Time Detections', cv2.WINDOW_NORMAL) 
+
+                              ret,buffer=cv2.imencode('.jpg',frame)
+                              frame=buffer.tobytes()
+
+                          yield(b'--frame\r\n'
+                                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+                  #end of yolo code
+
+
+                  #code for lane
+
+
+
+                  from flask import Flask,render_template,Response
+
+                  import numpy as np
+                  import cv2
+                  import time
+
+
+                  import matplotlib.pyplot as plt
+
+                  app=Flask(__name__)
+                  camera=cv2.VideoCapture('app/static/test1.mp4')
+
+
+
+                  def make_coordinates(image, line_parameters):    #to put the coords for  the line region_of_interest
+                      try:
+                          slope ,intercept = line_parameters
+                      except:
+                          slope, intercept = 0.001, 0
+                      y1 = image.shape[0]         #heightof the img    #so both of the lines will have the same verticle coords
+                      y2 = int(y1*(3/5))
+                      x1 = int((y1 - intercept)/slope)        #rearragnge y=mx+c so x=....form
+                      x2 = int((y2 - intercept)/slope)
+                      return np.array([x1,y1,x2,y2])
+
+                  def average_slope_intercept(image, lines):
+                      left_fit = []           #left_fit will contain coords of the line which will display on the left and same for right_fit
+                      right_fit = []          #2 empty lists are declared
+                      for line in lines:        #loop through every line
+                          x1, y1, x2, y2 = line.reshape(4) #reshape each line into a 1d array with 4 elements n unpack the elements of the array into 4 variables.
+                          parameters = np.polyfit((x1,x2), (y1,y2), 1)  #polyfill will fit a 1st degree polynomianl which will be a linear func of y=mx+c,it's going to fix the ploynomial to x n y points n return a vector of coefficients which describe the slope in the intercept.
+                                                                      # 3rd arg will fit a polynomial of degree 1 to our x n y points .that way we get the parameters of a linear func.
+                          slope = parameters[0]         #slope is the 1st element in the array. n intercept is the 2nd elemetn .
+                          intercept = parameters[1]
+                          if slope < 0:                 #to check if the slope of the line corresponds to a line of the left side of on the right side.
+                              left_fit.append((slope, intercept))
+                          else:
+                              right_fit.append((slope, intercept))
+
+                      left_fit_average = np.average(left_fit, axis=0)
+                      right_fit_average = np.average(right_fit, axis=0)
+                      left_line = make_coordinates(image, left_fit_average)
+                      right_line = make_coordinates(image, right_fit_average)
+                      return np.array([left_line, right_line])
+
+                  def canny(image):
+                      gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) #CONVERT IMG TO  grayscale
+                      blur = cv2.GaussianBlur(gray, (5, 5), 0)  #using gausian blur to reduce noise in the grayscale image
+                      canny = cv2.Canny(blur, 50,150)  #applying canny on blur image with low and hight threshold as 50 & 150 //to outline the strongest gradient in thr IMG
+                      return canny
+
+                  def display_lines(image, lines):
+                      line_image = np.zeros_like(image)
+                      if lines is not None:
+                          for x1,y1,x2,y2 in lines:
+                              #x1,y1,x2,y2 = line.reshape(4)      #converting 2d line to 1d with 4 coords
+                              cv2.line(line_image, (x1, y1), (x2, y2), (255,0,0), 10) #(line_image,(1st point of the line segment),(2nd pnt of the line segments),color of the lines i.e blue ,thickness of line i.e 10)
+                      return line_image
+                  def region_of_interest(image):
+                      height = image.shape[0] #count the row from 0 as rows are the same as height pretty much
+                      polygons = np.array([
+                      [(200, height), (1100, height), (550,250)]
+                      ]) #(x,y) coordinates to draw the triangle
+                      mask = np.zeros_like(image) #converting numpy arrays of image to black i.e 0
+                      cv2.fillPoly(mask, polygons, 255)   #put triangle coordinates on mask img in white colot i.e 255
+                      masked_image = cv2.bitwise_and(image, mask)          # & operation between mask mg n ROI image which will give only 111 part of triangle in the masked_image
+                      return masked_image
+
+
+                  def generate_frames():
+                      while True:
+                              
+                          ## read the camera frame
+                          success,frame=camera.read()
+                          if not success:
+                              print("not sucess sbs")
+                              break
+                          else:
+                              canny_image = canny(frame)
+                              cropped_image = region_of_interest(canny_image)       #performing roi on canny img
+                              lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([()]), minLineLength=40, maxLineGap=5 ) #to detect straight lines
+                              # args: cropped_image,
+                              #2nd 3rd args specify the resolution of hough acumulator array i.e;, grid which is 2d of row n cols .So a precision of 2px with 1 deg precision in radians,
+                              #4th is the threshold value that is minimum no. to get accepted ie., 100
+                              # 5this a placeholder array that we need to pass
+                              # 6th is length of the line in pixel that we'll accept into the output,So less than 40 is not acceptable
+                              # 7th indicates the max distance in pixels betwn lines whcih will be allowed to be connected into the single line instead of being broken up.
+                              averaged_lines = average_slope_intercept(frame, lines)     #passing colored img n sraight lines img
+                              line_image = display_lines(frame, averaged_lines)
+                              #combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)   # add both imgs mul 1st img with 0.8 n 2nd with 1 so 2nd is more weighted than 1st which will show more clear blue lines on the original img,1 is added to the summed img.
+
+
+                              ret,buffer=cv2.imencode('.jpg',frame)
+                              frame=buffer.tobytes()
+
+                          yield(b'--frame\r\n'
+                                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+                  @app.route('/lane')
+                  def lane():
+                      return render_template('lane.html')
+
+                  @app.route('/videolane')
+                  def videolane():
+                      return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+
+
+                  #end of lane code
+
+
+                  # Main function
+                  if __name__ == '__main__':
+                      app.run()
+
+                </code>
+            </pre>
+      </div>
+    </section>
+
+    <script src="./prism.js"></script>
+  </body>
+</html>
